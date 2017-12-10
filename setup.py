@@ -49,7 +49,7 @@ We got jTrees yo.
     install_requires=[
         'urwid',
         'urwidtrees',
-        'docops'
+        'docopt'
     ],
     extras_require={
         'tests': tests_require,

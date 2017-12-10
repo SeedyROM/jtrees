@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # This file is part of jtrees.
-# https://github.com/someuser/somepackage
+# https://github.com/SeedyROM/jtrees
 
 # Licensed under the MIT license:
 # http://www.opensource.org/licenses/MIT-license
@@ -33,7 +33,7 @@ We got jTrees yo.
     keywords='weed trees json',
     author='Chris and Zack',
     author_email='zackkollar@gmail.com',
-    url='https://github.com/someuser/somepackage',
+    url='https://github.com/SeedyROM/jtrees',
     license='MIT',
     classifiers=[
         'Development Status :: 4 - Beta',

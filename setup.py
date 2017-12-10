@@ -47,16 +47,16 @@ We got jTrees yo.
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        # add your dependencies here
-        # remember to use 'package-name>=x.y.z,<x.y+1.0' notation (this way you get bugfixes)
+        'urwid',
+        'urwidtrees',
+        'docops'
     ],
     extras_require={
         'tests': tests_require,
     },
     entry_points={
         'console_scripts': [
-            # add cli scripts here in this form:
-            # 'jtrees=jtrees.cli:main',
+            'jtrees=jtrees.cli:main',
         ],
     },
 )

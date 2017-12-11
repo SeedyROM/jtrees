@@ -9,11 +9,11 @@ import urwidtrees
 import requests
 import json
 
-from . import interface
-
 from docopt import docopt
 
-def traverse_dict(d, f=lambda k, v: print(f'{k} {v}')):
+from . import interface
+
+def traverse_dict(d, tree):
     '''Traverse a dictionary recursively and call an arbitrary function.
 
     Args:
@@ -24,13 +24,17 @@ def traverse_dict(d, f=lambda k, v: print(f'{k} {v}')):
     '''
     if isinstance(d, list):
         for _d in d:
-            traverse_dict(_d)
+            traverse_dict(_d, tree)
     else:
         for k, v in d.items():
             if isinstance(v, dict):
-                traverse_dict(d)
+                subtree = [urwid.SelectableIcon(str(f'{k}: {v}')), list()]
+                traverse_dict(v, subtree)
             else:
-              f(k, v)
+                subtree = [urwid.Text(str(f'{k}: {v}')), None]
+
+            tree[1].append(subtree)
+
 
 def start_urwid():
     '''Start urwid, and handle KeyboardInterrupt.
@@ -66,12 +70,12 @@ def main(*args, **kwargs):
 
     Return: None
     '''
-    json_data = requests.get('https://jsonplaceholder.typicode.com/posts')
-    json_data.raise_for_status()
+    # json_data = requests.get('https://jsonplaceholder.typicode.com/posts')
+    # json_data.raise_for_status()
+    #
+    # json_data = json_data.json()
 
-    json_data = json_data.json()
 
-    import pdb; pdb.set_trace()
 
     # traverse_dict(json_data, f=lambda x: x)
     interface.run()

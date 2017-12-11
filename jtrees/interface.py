@@ -36,17 +36,14 @@ def construct_example_simpletree_structure(selectable_nodes=True, children=3):
 
     Text = FocusableText if selectable_nodes else urwid.Text
 
-    json_data = requests.get('https://jsonplaceholder.typicode.com/posts')
+    json_data = requests.get('https://fakeuser-92f5d.firebaseio.com/thing.json')
     json_data.raise_for_status()
 
     json_data = json_data.json()
 
     # define root node
-    tree = (Text('ROOT'), [])
-
-    def 
-
-    cli.traverse_dict(json_data, f=)
+    tree = [Text('ROOT'), []]
+    cli.traverse_dict(json_data, tree)
 
     # # define some children
     # c = g = gg = 0  # counter

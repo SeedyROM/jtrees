@@ -13,6 +13,7 @@ from docopt import docopt
 
 from . import interface
 
+
 def traverse_dict(d, tree):
     '''Traverse a dictionary recursively and call an arbitrary function.
 
@@ -28,7 +29,7 @@ def traverse_dict(d, tree):
     else:
         for k, v in d.items():
             if isinstance(v, dict):
-                subtree = [urwid.SelectableIcon(str(f'{k}: {v}')), list()]
+                subtree = [urwid.SelectableIcon(str(f'{k}')), list()]
                 traverse_dict(v, subtree)
             else:
                 subtree = [urwid.Text(str(f'{k}: {v}')), None]
@@ -62,6 +63,7 @@ def start_urwid():
         print('☮  Peace! ☮')
         return
 
+
 def main(*args, **kwargs):
     '''The main entry point.
 
@@ -79,6 +81,7 @@ def main(*args, **kwargs):
 
     # traverse_dict(json_data, f=lambda x: x)
     interface.run()
+
 
 if __name__ == '__main__':
     kwargs = docopt(__doc__)

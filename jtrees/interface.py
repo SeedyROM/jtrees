@@ -32,66 +32,56 @@ class FocusableText(urwid.WidgetWrap):
         return key
 
 
+def http_get_json(url):
+    ''' get json from any web source '''
+
+    json_data = requests.get(url)
+    json_data.raise_for_status()
+
+    json_data = json_data.json()
+
+    return json_data
+
+
 def construct_example_simpletree_structure(selectable_nodes=True, children=3):
 
     Text = FocusableText if selectable_nodes else urwid.Text
 
-    json_data = requests.get('https://fakeuser-92f5d.firebaseio.com/thing.json')
-    json_data.raise_for_status()
+    json_url = 'https://fakeuser-92f5d.firebaseio.com/thing.json'
 
-    json_data = json_data.json()
+    json_data = http_get_json(json_url)
 
     # define root node
     tree = [Text('ROOT'), []]
     cli.traverse_dict(json_data, tree)
 
-    # # define some children
-    # c = g = gg = 0  # counter
-    # for i in range(children):
-    #     subtree = (Text('Child {0:d}'.format(c)), [])
-    #     # and grandchildren..
-    #     for j in range(children):
-    #         subsubtree = (Text('Grandchild {0:d}'.format(g)), [])
-    #         for k in range(children):
-    #             leaf = (Text('Grand Grandchild {0:d}'.format(gg)), None)
-    #             subsubtree[1].append(leaf)
-    #             gg += 1  # inc grand-grandchild counter
-    #         subtree[1].append(subsubtree)
-    #         g += 1  # inc grandchild counter
-    #     tree[1].append(subtree)
-    #     c += 1
     return tree
 
 
-def construct_example_tree(selectable_nodes=True, children=2):
-    # define a list of tree structures to be passed on to SimpleTree
-    forrest = [construct_example_simpletree_structure(selectable_nodes,
-                                                      children)]
-
-    # stick out test tree into a SimpleTree and return
-    return SimpleTree(forrest)
-
 def unhandled_input(k):
-    #exit on q
-    if k in ['q', 'Q']: raise urwid.ExitMainLoop()
+    ''' call back from MainLoop '''
+    # exit on q
+    if k in ['q', 'Q']:
+        raise urwid.ExitMainLoop()
+
 
 def run():
     # get example tree
-    stree = construct_example_tree()
+    forrest = [construct_example_simpletree_structure()]
+
+    tree = SimpleTree(forrest)
+
     # Here, we add some decoration by wrapping the tree using ArrowTree.
-    atree = ArrowTree(stree,
-                      # customize at will..
-                      # arrow_hbar_char=u'\u2550',
-                      # arrow_vbar_char=u'\u2551',
-                      # arrow_tip_char=u'\u25B7',
-                      # arrow_connector_tchar=u'\u2560',
-                      # arrow_connector_lchar=u'\u255A',
-                      )
+    tree = ArrowTree(tree)
 
     # put the into a treebox
-    treebox = TreeBox(atree)
+    treebox = TreeBox(tree)
+
     rootwidget = urwid.AttrMap(treebox, 'body')
-    #add a text footer
+    # add a text footer
     footer = urwid.AttrMap(urwid.Text('Q to quit'), 'focus')
-    #enclose in a frame
-    urwid.MainLoop(urwid.Frame(rootwidget, footer=footer), palette, unhandled_input = unhandled_input).run()  # go
+    # enclose in a frame
+
+    # start the curses interface
+    urwid.MainLoop(urwid.Frame(rootwidget, footer=footer),
+                   palette, unhandled_input=unhandled_input).run()

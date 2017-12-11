@@ -2,35 +2,44 @@
 # Copyright (C) 2013  Patrick Totzke <patricktotzke@gmail.com>
 # This file is released under the GNU GPL, version 3 or a later revision.
 
-from urwidtrees.decoration import ArrowTree  # for Decoration
+from urwidtrees.decoration import CollapsibleArrowTree  # for Decoration
 from urwidtrees.tree import SimpleTree
+from urwidtrees.nested import NestedTree
 from urwidtrees.widgets import TreeBox
 import urwid
 import requests
 
-from . import cli
+from .widgets.generic import FocusableText
 
 palette = [
-    ('body', 'black', 'light gray'),
-    ('focus', 'light gray', 'dark blue', 'standout'),
-    ('bars', 'dark blue', 'light gray', ''),
+    ('body', 'light green', 'black'),
+    ('focus', 'light magenta', 'dark gray', 'standout'),
+    ('bars', 'dark green', 'white', ''),
     ('arrowtip', 'light blue', 'light gray', ''),
     ('connectors', 'light red', 'light gray', ''),
 ]
 
-class FocusableText(urwid.WidgetWrap):
-    """Selectable Text used for nodes in our example"""
-    def __init__(self, txt):
-        t = urwid.Text(txt)
-        w = urwid.AttrMap(t, 'body', 'focus')
-        urwid.WidgetWrap.__init__(self, w)
+def generate_urwid_tree_from_dict(d, tree):
+    '''Traverse a dictionary recursively and creates a valid Urwid tree.
 
-    def selectable(self):
-        return True
+    Args:
+        d (dict or iterable): Dictionary to traverse.
+        tree (list): State to alter with side effects.
 
-    def keypress(self, size, key):
-        return key
+    Returns: None
+    '''
+    if isinstance(d, list):
+        for _d in d:
+            generate_urwid_tree_from_dict(_d, tree)
+    else:
+        for k, v in d.items():
+            if isinstance(v, dict):
+                subtree = [urwid.SelectableIcon(str(f'{k}')), list()]
+                generate_urwid_tree_from_dict(v, subtree)
+            else:
+                subtree = [urwid.Text(str(f'{k}: {v}')), None]
 
+            tree[1].append(subtree)
 
 def http_get_json(url):
     ''' get json from any web source '''
@@ -42,46 +51,37 @@ def http_get_json(url):
 
     return json_data
 
+class JTreesCLI():
+    @property
+    def forrest(self):
+        json_url = 'https://fakeuser-92f5d.firebaseio.com/thing.json'
+        json_data = http_get_json(json_url)
 
-def construct_example_simpletree_structure(selectable_nodes=True, children=3):
+        tree = [FocusableText('ROOT'), []]
+        generate_urwid_tree_from_dict(json_data, tree)
 
-    Text = FocusableText if selectable_nodes else urwid.Text
+        # Must return a list of nodes.
+        return [tree]
 
-    json_url = 'https://fakeuser-92f5d.firebaseio.com/thing.json'
+    def unhandled_input(self, key):
+        ''' call back from MainLoop '''
+        if key in ['q', 'Q']:
+            raise KeyboardInterrupt
+        if key == ' ':
+            x = self.tree_box.get_focus()
+            import pudb; pudb.set_trace()
 
-    json_data = http_get_json(json_url)
+    def __init__(self):
+        self.tree = SimpleTree(self.forrest)
+        self.tree_box = TreeBox(CollapsibleArrowTree(self.tree))
 
-    # define root node
-    tree = [Text('ROOT'), []]
-    cli.traverse_dict(json_data, tree)
+        self.widget = urwid.AttrMap(self.tree_box, 'body')
+        self.footer = urwid.AttrMap(urwid.Text('Q to quit'), 'focus')
 
-    return tree
-
-
-def unhandled_input(k):
-    ''' call back from MainLoop '''
-    # exit on q
-    if k in ['q', 'Q']:
-        raise urwid.ExitMainLoop()
-
-
-def run():
-    # get example tree
-    forrest = [construct_example_simpletree_structure()]
-
-    tree = SimpleTree(forrest)
-
-    # Here, we add some decoration by wrapping the tree using ArrowTree.
-    tree = ArrowTree(tree)
-
-    # put the into a treebox
-    treebox = TreeBox(tree)
-
-    rootwidget = urwid.AttrMap(treebox, 'body')
-    # add a text footer
-    footer = urwid.AttrMap(urwid.Text('Q to quit'), 'focus')
-    # enclose in a frame
-
-    # start the curses interface
-    urwid.MainLoop(urwid.Frame(rootwidget, footer=footer),
-                   palette, unhandled_input=unhandled_input).run()
+    def run(self):
+        try:
+            urwid.MainLoop(urwid.Frame(self.widget, footer=self.footer),
+                           palette, unhandled_input=self.unhandled_input).run()
+        except KeyboardInterrupt:
+            print('☮  Peace! ☮')
+            return

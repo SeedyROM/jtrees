@@ -13,7 +13,7 @@ ipdb==0.10.3
 ipython==6.2.1
 ipython-genutils==0.2.0
 jedi==0.11.0
-Jinja2==2.10
+Jinja2==2.11.3
 -e git+https://github.com/SeedyROM/jtrees.git@7706030b13d6bba3bb131fc63060015dcad5ac38#egg=jtrees
 MarkupSafe==1.0
 mock==2.0.0
